@@ -49,8 +49,10 @@ con = sqlite3.connect(":memory:")
 cur = con.cursor()
 table_creation_query = "CREATE table Messages(" \
                        "Message_ID integer primary key autoincrement, " \
-                       "Message_Text text, Message_DateTime text, " \
-                       "Message_Sender text, Message_Receiver text)"
+                       "Message_Text text, " \
+                       "Message_DateTime text, " \
+                       "Message_Sender text, " \
+                       "Message_Receiver text)"
 run_query(table_creation_query)
 
 # Form the XML structure
