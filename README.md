@@ -18,3 +18,9 @@ For example:
 Full example:
 
     python Message-Parser.py "D:\Users\Mike\Desktop\fb_archive\html\messages.htm" "user_aliases.txt" 1
+
+## Future Developments
+* Add support for group chats
+* Increased performance
+* Interface for incorporation into other applications
+* Add support for strings with single-quotes
