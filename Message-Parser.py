@@ -3,6 +3,7 @@ import string
 import datetime
 import sqlite3
 import sys
+from pypika import Query, Table
 
 MESSAGES_FILE_NAME = sys.argv[1]    # Facebook messages file path. Archive usually "messages.htm".
 USER_ALIASES = lines = [line.rstrip('\n') for line in open(sys.argv[2])]    # Reads the alias file, puts into list.
@@ -67,6 +68,9 @@ def run_query(query_string, con):
     return cur.fetchall()
 
 
+
+
+
 def create_database_from_html(location=":memory:"):
     """
     Parses HTML of a facebook message data sump and stores the data in an SQLite database.
@@ -79,13 +83,38 @@ def create_database_from_html(location=":memory:"):
 
     # Setup memory-based database
     con = sqlite3.connect(location)
-    table_creation_query = "CREATE table Messages(" \
-                           "Message_ID integer primary key autoincrement, " \
-                           "Message_Text text, " \
-                           "Message_DateTime text, " \
-                           "Message_Sender text, " \
-                           "Message_Receiver text)"
-    run_query(table_creation_query, con)
+
+    messages_table_details = {
+        "name": "Messages",
+        "rows": [
+            {
+                "name": "Message_ID",
+                "type": "integer",
+                "attributes": ["primary", "key", "autoincrement"]
+            },
+            {
+                "name": "Message_Text",
+                "type": "text"
+            },
+            {
+                "name": "Message_DateTime",
+                "type": "text"
+            },
+            {
+                "name": "Message_Sender",
+                "type": "text"
+            },
+            {
+                "name": "Message_Receiver",
+                "type": "text"
+            }
+        ]
+    }
+
+
+
+
+    #run_query(table_creation_query, con)
 
     # Form the XML structure
     root = ET.fromstring(filtered_string)
