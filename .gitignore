@@ -97,3 +97,4 @@ ENV/
 #Facebook-Message-Parser
 query_output.txt
 user_aliases.txt
+/data
