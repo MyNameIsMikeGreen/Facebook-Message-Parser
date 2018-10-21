@@ -9,44 +9,76 @@ USER_ALIASES = lines = [line.rstrip('\n') for line in open(sys.argv[2])]    # Re
 PREFERRED_ALIAS_INDEX = int(sys.argv[3])-1   # Line number in alias file that preferred alias appears on.
 
 
-# Returns the first element in an element list with the tag name specified. Returns None if not found.
 def first_element_with_tag(element_list, tag_name):
+    """
+    Returns the first element in an element list with the tag name specified.
+    :param element_list: List to search.
+    :param tag_name: Tag to extract.
+    :return: First element with tag name. None if not found.
+    """
     return next((x for x in element_list if x.tag == tag_name), None)
 
 
-# Returns the first element in an element list with the tag name specified. Returns None if not found.
 def first_element_with_tag_and_attributes(element_list, tag_name, attribute_name, attribute_value):
+    """
+    Returns the first element in an element list with the tag name specified.
+    :param element_list: List to search.
+    :param tag_name: Tag to extract.
+    :param attribute_name: Attribute to find on tag.
+    :param attribute_value: Value of attribute.
+    :return: First element with tag and attributes that match. None if not found.
+    """
     return next((x for x in element_list if (x.tag == tag_name) and
                  (x.attrib.get(attribute_name) == attribute_value)), None)
 
 
-# Returns all elements in an element list with the tag name specified. Returns None if not found.
 def all_elements_with_tag_and_attributes(element_list, tag_name, attribute_name, attribute_value):
+    """
+    Returns all elements in an element list with the tag name specified.
+    :param element_list: List to search.
+    :param tag_name: Tag to extract.
+    :param attribute_name: Attribute to find on tag.
+    :param attribute_value: Value of attribute.
+    :return: All elements that match tag and attribute values. None if not found.
+    """
     return [x for x in element_list if (x.tag == tag_name) and (x.attrib.get(attribute_name) == attribute_value)]
 
 
-# Strips the timezone from a Facebook date string.
 def strip_time_zone(timezone_string):
+    """
+    Strips the timezone from a Facebook date string.
+    :param timezone_string: String to strip timezone from.
+    :return: String without timezone.
+    """
     if timezone_string[-3:] == "UTC":
         return timezone_string[:-4]
     return timezone_string[:-7]
 
 
-# Run a query on a SQLite database.
 def run_query(query_string, con):
+    """
+    Run a query on a SQLite database.
+    :param query_string: Query to run.
+    :param con: Connection to run query on.
+    :return: Result of query.
+    """
     cur = con.cursor()
     cur.execute(query_string)
     return cur.fetchall()
 
 
-def create_database_from_html():
-    # Open the file and filter out non-printable characters
+def create_database_from_html(location=":memory:"):
+    """
+    Parses HTML of a facebook message data sump and stores the data in an SQLite database.
+    :param location: Location of database - :memory: by default.
+    :return: Connection to newly created database.
+    """
     with open(MESSAGES_FILE_NAME, "r") as file:
         file_string = file.read()
     filtered_string = filter(lambda x: x in string.printable, file_string)  # Strip non-printable characters
 
     # Setup memory-based database
-    con = sqlite3.connect(":memory:")
+    con = sqlite3.connect(location)
     cur = con.cursor()
     table_creation_query = "CREATE table Messages(" \
                            "Message_ID integer primary key autoincrement, " \
