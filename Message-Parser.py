@@ -79,14 +79,13 @@ def create_database_from_html(location=":memory:"):
 
     # Setup memory-based database
     con = sqlite3.connect(location)
-    cur = con.cursor()
     table_creation_query = "CREATE table Messages(" \
                            "Message_ID integer primary key autoincrement, " \
                            "Message_Text text, " \
                            "Message_DateTime text, " \
                            "Message_Sender text, " \
                            "Message_Receiver text)"
-    run_query(table_creation_query)
+    run_query(table_creation_query, con)
 
     # Form the XML structure
     root = ET.fromstring(filtered_string)
