@@ -7,7 +7,7 @@ class TestSql(unittest.TestCase):
     def test_table_creation(self):
         messages_table_details = {
             "name": "Messages",
-            "rows": [
+            "columns": [
                 {
                     "name": "Message_ID",
                     "type": "integer",

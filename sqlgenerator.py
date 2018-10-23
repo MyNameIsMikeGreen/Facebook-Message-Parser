@@ -18,7 +18,7 @@ class SqlGenerator(object):
         :return: An SQL query to create the table described.
         """
         col_strings = []
-        for col in table_details["cols"]:
+        for col in table_details["columns"]:
             col_string = "{0} {1}".format(col["name"], col["type"])
             if "attributes" in col:
                 attributes = " ".join([attribute for attribute in col["attributes"]])
@@ -36,7 +36,7 @@ class SqlGenerator(object):
         :param table_details: JSON defining tables in the form:
          {
              "name": "Messages",
-                "cols": [
+                "columns": [
                     {
                         "name": "Message_ID",
                         "type": "integer",
