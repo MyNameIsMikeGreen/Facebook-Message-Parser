@@ -1,4 +1,7 @@
 class SqlGenerator(object):
+    """
+    Functions for automatically generating SQL query strings.
+    """
 
     @staticmethod
     def get_query_create_table(table_details):
@@ -30,7 +33,7 @@ class SqlGenerator(object):
         return query
 
     @staticmethod
-    def get_query_insert_into_table(table_details, input_values):
+    def get_query_insert_into_table(table_details, input_map):
         """
         Insert a set of values for named columns for a table that is defined with the specification.
         :param table_details: JSON defining tables in the form:
@@ -44,20 +47,27 @@ class SqlGenerator(object):
                     }
                 ]
         }
-        :param input_values: JSON key-value pairs for column names and values to be put against those columns.
+        :param input_map: JSON key-value pairs for column names and values to be put against those columns.
         :return: An SQL query to insert the desired values.
+        :raises ValueError: The input map contains columns that are not in the table description.
         """
         raise NotImplementedError("This function has not yet been tested and thus should not be used yet.")
+
         # Get two lists splitting the key-values in the same respective order
-        table_cols = []
-        values = []
-        for k, v in input_values:
-            table_cols.append(k)
-            values.append(v)
+        input_table_cols = []
+        input_values = []
+        for k, v in input_map:
+            input_table_cols.append(k)
+            input_values.append(v)
 
-        table_cols_str = ", ".join(table_cols)
+        # Check that the input values are valid in the table schema
+        schema_table_cols = [col["name"] for col in table_details["columns"]]
+        if not set(input_table_cols).issubset(set(schema_table_cols)):
+            raise ValueError("Attempted to insert into non-existent column.")
+
+        # Form the SQL query
+        table_cols_str = ", ".join(input_table_cols)
         # TODO: Type checking to remove "'" where necessary
-        values_str = ", ".join(["'" + str(value) + "'" for value in values])  # Add the quotes
-
+        values_str = ", ".join(["'" + str(value) + "'" for value in input_values])  # Add the quotes
         query = "INSERT into {0}({1} VALUES {2})".format(table_details["name"], table_cols_str, values_str)
         return query
