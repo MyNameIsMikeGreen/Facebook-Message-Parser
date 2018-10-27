@@ -4,9 +4,9 @@ import datetime
 import sqlite3
 import sys
 
-from htmlparser import first_element_with_tag, first_element_with_tag_and_attributes, \
+from src.html.htmlparser import first_element_with_tag, first_element_with_tag_and_attributes, \
     all_elements_with_tag_and_attributes, strip_time_zone
-from sqlgenerator import SqlGenerator
+from src.sql.sqlgenerator import SqlGenerator
 
 MESSAGES_FILE_NAME = sys.argv[1]    # Facebook messages file path. Archive usually "messages.htm".
 USER_ALIASES = lines = [line.rstrip('\n') for line in open(sys.argv[2])]    # Reads the alias file, puts into list.

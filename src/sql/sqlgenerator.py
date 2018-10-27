@@ -1,3 +1,6 @@
+import logging
+
+
 class SqlGenerator(object):
     """
     Functions for automatically generating SQL query strings.
@@ -30,6 +33,7 @@ class SqlGenerator(object):
         table_cols_string = ", ".join(col_strings)
 
         query = "CREATE table {0}({1})".format(table_details["name"], table_cols_string)
+        logging.info("Generated table creation SQL query: '{}'".format(query))
         return query
 
     @staticmethod
@@ -69,4 +73,5 @@ class SqlGenerator(object):
         # TODO: Type checking to remove "'" where necessary
         values_str = ", ".join(["'" + str(value) + "'" for value in input_values])  # Add the quotes
         query = "INSERT into {0} ({1}) VALUES ({2})".format(table_details["name"], table_cols_str, values_str)
+        logging.info("Generated table insertion SQL query: '{}'".format(query))
         return query

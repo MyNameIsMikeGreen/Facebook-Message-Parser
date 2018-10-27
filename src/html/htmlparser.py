@@ -35,7 +35,7 @@ def all_elements_with_tag_and_attributes(element_list, tag_name, attribute_name,
 
 def strip_time_zone(timezone_string):
     """
-    Strips the timezone from a Facebook date string.
+    Strips the timezone fro a Facebook date string.
     :param timezone_string: String to strip timezone from.
     :return: String without timezone.
     """
