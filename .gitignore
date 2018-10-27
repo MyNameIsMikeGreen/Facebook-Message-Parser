@@ -90,11 +90,11 @@ ENV/
 # Rope project settings
 .ropeproject
 
-#PyCharm
+# PyCharm
 .idea/
 .idea
 
-#Facebook-Message-Parser
+# Facebook-Message-Parser
 query_output.txt
 user_aliases.txt
 data/
