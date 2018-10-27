@@ -3,6 +3,7 @@ import string
 import datetime
 import sqlite3
 import sys
+import logging
 
 from src.html.htmlparser import first_element_with_tag, first_element_with_tag_and_attributes, \
     all_elements_with_tag_and_attributes, strip_time_zone
@@ -20,8 +21,10 @@ def run_query(query_string, con):
     :param con: Connection to run query on.
     :return: Result of query.
     """
+    logging.info("Running query: '{}'".format(query_string))
     cur = con.cursor()
     cur.execute(query_string)
+    logging.info("Query ran successfully.")
     return cur.fetchall()
 
 
@@ -112,20 +115,22 @@ def create_database_from_html(location=":memory:"):
                         message_sender = message_sender.replace("'", "")
                     if message_receiver is not None:
                         message_receiver = message_receiver.replace("'", "")
-                    insertion_query = "INSERT into Messages(" \
-                                      "Message_Text, Message_DateTime, " \
-                                      "Message_Sender, Message_Receiver) " \
-                                      "VALUES ('" + str(message_body) + \
-                                      "', '" + str(message_time) + \
-                                      "', '" + str(message_sender) + \
-                                      "', '" + str(message_receiver) + "')"
+
+                    insertion_values = {
+                        "Message_Text": message_body,
+                        "Message_DateTime": message_time,
+                        "Message_Sender": message_sender,
+                        "Message_Receiver": message_receiver,
+                    }
+
+                    insertion_query = SqlGenerator.get_query_insert_into_table(messages_table_details, insertion_values)
                     try:
                         run_query(insertion_query, con)
                     except sqlite3.OperationalError:
-                        print("ERROR: ", str(insertion_query))
+                        logging.error("Query failed.")
                         continue
-                    print("Sender: " + str(message_sender) + ", Time: " + str(message_time) + ", Message: " + str(
-                        message_body))
+                    logging.debug("Sender: " + str(message_sender) + ", Time: " + str(message_time) + ", Message: "
+                                  + str(message_body))
     return con
 
 
