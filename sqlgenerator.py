@@ -51,12 +51,11 @@ class SqlGenerator(object):
         :return: An SQL query to insert the desired values.
         :raises ValueError: The input map contains columns that are not in the table description.
         """
-        raise NotImplementedError("This function has not yet been tested and thus should not be used yet.")
 
         # Get two lists splitting the key-values in the same respective order
         input_table_cols = []
         input_values = []
-        for k, v in input_map:
+        for k, v in input_map.items():
             input_table_cols.append(k)
             input_values.append(v)
 
@@ -69,5 +68,5 @@ class SqlGenerator(object):
         table_cols_str = ", ".join(input_table_cols)
         # TODO: Type checking to remove "'" where necessary
         values_str = ", ".join(["'" + str(value) + "'" for value in input_values])  # Add the quotes
-        query = "INSERT into {0}({1} VALUES {2})".format(table_details["name"], table_cols_str, values_str)
+        query = "INSERT into {0} ({1}) VALUES ({2})".format(table_details["name"], table_cols_str, values_str)
         return query
