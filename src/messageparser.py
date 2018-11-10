@@ -4,10 +4,11 @@ import datetime
 import sqlite3
 import sys
 import logging
+from os import path
 
-from src.html.htmlparser import first_element_with_tag, first_element_with_tag_and_attributes, \
+from html.htmlparser import first_element_with_tag, first_element_with_tag_and_attributes, \
     all_elements_with_tag_and_attributes, strip_time_zone
-from src.sql.sqlgenerator import SqlGenerator
+from sql.sqlgenerator import SqlGenerator
 
 MESSAGES_FILE_NAME = sys.argv[1]    # Facebook messages file path. Archive usually "messages.htm".
 USER_ALIASES = lines = [line.rstrip('\n') for line in open(sys.argv[2])]    # Reads the alias file, puts into list.
@@ -28,15 +29,23 @@ def run_query(query_string, con):
     return cur.fetchall()
 
 
-def create_database_from_html(location=":memory:"):
+def _filter_nonprintable(text):
+    import string
+    # Get the difference of all ASCII characters from the set of printable characters
+    nonprintable = set([chr(i) for i in range(128)]).difference(string.printable)
+    # Use translate to remove all non-printable characters
+    return text.translate({ord(character): None for character in nonprintable})
+
+
+def create_database_from_html(html_file, location=":memory:"):
     """
     Parses HTML of a facebook message data sump and stores the data in an SQLite database.
     :param location: Location of database - :memory: by default.
     :return: Connection to newly created database.
     """
-    with open(MESSAGES_FILE_NAME, "r") as file:
+    with open(html_file, "r", encoding="utf8") as file:
         file_string = file.read()
-    filtered_string = filter(lambda x: x in string.printable, file_string)  # Strip non-printable characters
+    filtered_string = _filter_nonprintable(file_string)
 
     # Setup memory-based database
     con = sqlite3.connect(location)
@@ -44,7 +53,7 @@ def create_database_from_html(location=":memory:"):
     # Define and create messages table
     messages_table_details = {
         "name": "Messages",
-        "rows": [
+        "columns": [
             {
                 "name": "Message_ID",
                 "type": "integer",
@@ -135,7 +144,7 @@ def create_database_from_html(location=":memory:"):
 
 
 if __name__ == '__main__':
-    database_connection = create_database_from_html()
+    database_connection = create_database_from_html(MESSAGES_FILE_NAME)
 
     # Example query. Output all messages to and from user account in order of sending.
     all_messages_sorted_query = run_query(
