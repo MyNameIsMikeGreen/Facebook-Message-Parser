@@ -1,5 +1,7 @@
+import argparse
 import datetime
 import logging
+import os
 import sqlite3
 import string
 import sys
@@ -9,9 +11,9 @@ from html.htmlparser import first_element_with_tag, first_element_with_tag_and_a
     all_elements_with_tag_and_attributes, strip_time_zone
 from sql.sqlgenerator import SqlGenerator
 
-MESSAGES_FILE_NAME = sys.argv[1]    # Facebook messages file path. Archive usually "messages.htm".
-USER_ALIASES = lines = [line.rstrip('\n') for line in open(sys.argv[2])]    # Reads the alias file, puts into list.
-PREFERRED_ALIAS_INDEX = int(sys.argv[3])-1   # Line number in alias file that preferred alias appears on.
+MESSAGES_FILE_NAME = sys.argv[1]  # Facebook messages file path. Archive usually "messages.htm".
+USER_ALIASES = lines = [line.rstrip('\n') for line in open(sys.argv[2])]  # Reads the alias file, puts into list.
+PREFERRED_ALIAS_INDEX = int(sys.argv[3]) - 1  # Line number in alias file that preferred alias appears on.
 
 
 def run_query(query_string, con):
@@ -144,7 +146,41 @@ def create_database_from_html(html_file, location=":memory:"):
     return con
 
 
+def parse_arguments():
+    """
+    Performs system argument setup.
+    :return: System arguments.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("archive", help="Path to the Facebook archive to inspect.", type=_check_archive)
+    return parser.parse_args()
+
+
+def _check_archive(archive_path):
+    """
+    Type check for archive argument.
+    :param archive_path: Path supplied as value for archive in system arguments.
+    :return: archive_path if valid. Raises errors if not valid.
+    """
+    if not os.path.isfile(archive_path):
+        raise argparse.ArgumentTypeError("There is no file at the supplied archive location.")
+    if not _file_is_archive(archive_path):
+        raise argparse.ArgumentTypeError("The supplied file does not look like a valid Facebook archive.")
+    return archive_path
+
+
+def _file_is_archive(file_path):
+    """
+    Determines whether a file is probably a Facebook archive file.
+    :type file_path: Path of file to check.
+    :return: True if the file is of similar format to a Facebook archive file. Else, False.
+    """
+    # TODO: Add functionality
+    return True
+
+
 if __name__ == '__main__':
+    args = parse_arguments()
     database_connection = create_database_from_html(MESSAGES_FILE_NAME)
 
     # Example query. Output all messages to and from user account in order of sending.
