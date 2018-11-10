@@ -1,10 +1,9 @@
-import xml.etree.ElementTree as ET
-import string
 import datetime
-import sqlite3
-import sys
 import logging
-from os import path
+import sqlite3
+import string
+import sys
+import xml.etree.ElementTree as ET
 
 from html.htmlparser import first_element_with_tag, first_element_with_tag_and_attributes, \
     all_elements_with_tag_and_attributes, strip_time_zone
@@ -30,10 +29,12 @@ def run_query(query_string, con):
 
 
 def _filter_nonprintable(text):
-    import string
-    # Get the difference of all ASCII characters from the set of printable characters
+    """
+    Remove all non-printable text from a string.
+    :param text: String to remove non-printable characters from.
+    :return: String without non-printable characters.
+    """
     nonprintable = set([chr(i) for i in range(128)]).difference(string.printable)
-    # Use translate to remove all non-printable characters
     return text.translate({ord(character): None for character in nonprintable})
 
 
