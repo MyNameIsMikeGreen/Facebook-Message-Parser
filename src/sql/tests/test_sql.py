@@ -1,5 +1,5 @@
 import unittest
-from src.sql.sqlgenerator import SqlGenerator
+from sql.sqlgenerator import SqlGenerator
 
 
 class TestSql(unittest.TestCase):
