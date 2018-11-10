@@ -1,5 +1,5 @@
 # Facebook-Message-Parser
-[![Build Status](https://api.travis-ci.com/mikegreen1995/Facebook-Message-Parser.svg?branch=query_builder)](https://travis-ci.com/mikegreen1995/Facebook-Message-Parser)
+[![Build Status](https://api.travis-ci.com/mikegreen1995/Facebook-Message-Parser.svg?branch=master)](https://travis-ci.com/mikegreen1995/Facebook-Message-Parser)
 
 Convert a Facebook message archive to an SQLite database for further querying.
 
