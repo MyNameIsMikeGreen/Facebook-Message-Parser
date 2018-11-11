@@ -31,4 +31,4 @@ def get_archive(location):
 if __name__ == '__main__':
     args = parse_arguments()
     archive = get_archive(args.archive)
-
+    print(archive.get_message_file_list())

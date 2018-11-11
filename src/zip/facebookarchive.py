@@ -12,6 +12,8 @@ TYPE_HTML = "html"
 class FacebookArchive(ABC):
     """ Representation of a generic Facebook data archive ZIP. """
 
+    __slots__ = ["location", "name_list"]
+
     def __init__(self, location):
         """
         Holds the meta-data related to a Facebook data archive.
@@ -25,6 +27,11 @@ class FacebookArchive(ABC):
             raise InvalidArchiveError("The supplied archive is invalid.")
 
         self.location = location
+
+        # Store a list of all items so that it does not need to be re-opened several times.
+        with ZipFile(self.location, "r") as zip_file:
+            self.name_list = zip_file.namelist()
+
         super().__init__()
 
     @abstractmethod
@@ -98,7 +105,11 @@ class FacebookJsonArchive(FacebookArchive):
         self.type = TYPE_JSON
 
     def get_message_file_list(self):
-        pass
+        """
+        Get the list of all message files in the archive.
+        :return: A list of all message file paths.
+        """
+        return [item for item in self.name_list if os.path.basename(item) == "message.json"]
 
     def parse_message_file(self, message_file):
         pass
@@ -111,7 +122,11 @@ class FacebookHtmlArchive(FacebookArchive):
         self.type = TYPE_HTML
 
     def get_message_file_list(self):
-        pass
+        """
+        Get the list of all message files in the archive.
+        :return: A list of all message file paths.
+        """
+        return [item for item in self.name_list if os.path.basename(item) == "message.html"]
 
     def parse_message_file(self, message_file):
         pass
