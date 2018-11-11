@@ -1,6 +1,6 @@
 import unittest
 
-from zip.archiveinspector import _count_list_similarities
+from zip.facebookarchive import _count_list_similarities
 
 
 class TestZipSupportFunctions(unittest.TestCase):
