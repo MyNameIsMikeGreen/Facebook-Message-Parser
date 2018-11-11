@@ -1,28 +1,34 @@
-import argparse
 import os
 from zipfile import ZipFile
 
+from zip.errors import InvalidArchiveError
 from zip.zipconstants import EXPECTED_SUBDIRECTORIES, MESSAGES
 
+TYPE_JSON = "json"
+TYPE_HTML = "html"
 
-class ArchiveInspector(object):
+
+class FacebookArchive(object):
     """
     Functions for inspecting Facebook data archive ZIPs.
     """
 
-    @staticmethod
-    def check_archive(archive_path, exception=argparse.ArgumentTypeError):
+    __slots__ = ["type", "location"]
+
+    def __init__(self, location):
         """
-        Type check for archive argument. Intended for use with argparse type checking.
-        :param archive_path: Path supplied as value for archive in system arguments.
-        :param exception: Exception to be thrown if archive is invalid. argparse.ArgumentTypeError by default.
-        :return: archive_path if valid. Raises errors if not valid.
+        Holds the meta-data related to a Facebook data archive.
+        :param location: Location of the archive.
         """
-        if not os.path.isfile(archive_path):
-            raise exception("There is no file at the supplied archive location.")
-        if not ArchiveInspector.file_is_archive(archive_path):
-            raise exception("The supplied file does not look like a valid Facebook archive.")
-        return archive_path
+
+        # Check that the file is a valid archive before importing.
+        if not os.path.isfile(location):
+            raise FileNotFoundError("No file found at: " + location)
+        if not FacebookArchive.file_is_archive(location):
+            raise InvalidArchiveError("The supplied archive is invalid.")
+
+        self.location = location
+        self.type = FacebookArchive.get_archive_type(location)
 
     @staticmethod
     def file_is_archive(file_path, confidence=0.8):
@@ -54,6 +60,15 @@ class ArchiveInspector(object):
 
         # All checks passed
         return True
+
+    @staticmethod
+    def get_archive_type(file_path):
+        """
+        Determines the type of archive at a path.
+        :param file_path: Path to the archive to test.
+        :return: Name of one of the Facebook archive types.
+        """
+        return TYPE_JSON
 
 
 def _count_list_similarities(primary, proposed):

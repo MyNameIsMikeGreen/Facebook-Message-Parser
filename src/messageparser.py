@@ -1,8 +1,6 @@
 import argparse
 import logging
 
-from zip.archiveinspector import ArchiveInspector
-
 
 def run_query(query_string, con):
     """
@@ -24,7 +22,7 @@ def parse_arguments():
     :return: System arguments.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("archive", help="Path to the Facebook archive to inspect.", type=ArchiveInspector.check_archive)
+    parser.add_argument("archive", help="Path to the Facebook archive to inspect.")
     return parser.parse_args()
 
 
