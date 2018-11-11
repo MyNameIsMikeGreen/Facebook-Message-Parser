@@ -9,11 +9,9 @@ TYPE_HTML = "html"
 
 
 class FacebookArchive(object):
-    """
-    Functions for inspecting Facebook data archive ZIPs.
-    """
+    """ Representation of a generic Facebook data archive ZIP. """
 
-    __slots__ = ["type", "location"]
+    __slots__ = ["location", "type"]
 
     def __init__(self, location):
         """
@@ -28,7 +26,6 @@ class FacebookArchive(object):
             raise InvalidArchiveError("The supplied archive is invalid.")
 
         self.location = location
-        self.type = FacebookArchive.get_archive_type(location)
 
     @staticmethod
     def file_is_archive(file_path, confidence=0.8):
@@ -75,6 +72,20 @@ class FacebookArchive(object):
             return TYPE_HTML
         else:
             return TYPE_JSON
+
+
+class FacebookJsonArchive(FacebookArchive):
+    """ Representation of a JSON Facebook data archive ZIP. """
+    def __init__(self, location):
+        super().__init__(location)
+        self.type = TYPE_JSON
+
+
+class FacebookHtmlArchive(FacebookArchive):
+    """ Representation of a HTML Facebook data archive ZIP. """
+    def __init__(self, location):
+        super().__init__(location)
+        self.type = TYPE_HTML
 
 
 def _count_list_similarities(primary, proposed):
