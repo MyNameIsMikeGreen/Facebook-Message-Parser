@@ -68,7 +68,13 @@ class FacebookArchive(object):
         :param file_path: Path to the archive to test.
         :return: Name of one of the Facebook archive types.
         """
-        return TYPE_JSON
+        # TODO: Implement a more rigorous check of archive type.
+        with ZipFile(file_path, "r") as zip_file:
+            name_list = zip_file.namelist()
+        if "index.html" in name_list:
+            return TYPE_HTML
+        else:
+            return TYPE_JSON
 
 
 def _count_list_similarities(primary, proposed):

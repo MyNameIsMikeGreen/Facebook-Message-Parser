@@ -22,7 +22,7 @@ def parse_arguments():
     :return: System arguments.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("archive", help="Path to the Facebook archive to inspect.")
+    parser.add_argument("archive", help="Path to the Facebook archive.")
     return parser.parse_args()
 
 
