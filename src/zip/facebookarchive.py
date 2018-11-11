@@ -1,4 +1,5 @@
 import os
+from abc import ABC, abstractmethod
 from zipfile import ZipFile
 
 from zip.errors import InvalidArchiveError
@@ -8,10 +9,8 @@ TYPE_JSON = "json"
 TYPE_HTML = "html"
 
 
-class FacebookArchive(object):
+class FacebookArchive(ABC):
     """ Representation of a generic Facebook data archive ZIP. """
-
-    __slots__ = ["location", "type"]
 
     def __init__(self, location):
         """
@@ -26,6 +25,24 @@ class FacebookArchive(object):
             raise InvalidArchiveError("The supplied archive is invalid.")
 
         self.location = location
+        super().__init__()
+
+    @abstractmethod
+    def get_message_file_list(self):
+        """
+        Get the list of all message files in the archive.
+        :return: A list of all message file paths.
+        """
+        pass
+
+    @abstractmethod
+    def parse_message_file(self, message_file):
+        """
+        Parse a message file within the archive.
+        :param message_file: Path to message file to parse.
+        :return: TODO
+        """
+        pass
 
     @staticmethod
     def file_is_archive(file_path, confidence=0.8):
@@ -80,12 +97,24 @@ class FacebookJsonArchive(FacebookArchive):
         super().__init__(location)
         self.type = TYPE_JSON
 
+    def get_message_file_list(self):
+        pass
+
+    def parse_message_file(self, message_file):
+        pass
+
 
 class FacebookHtmlArchive(FacebookArchive):
     """ Representation of a HTML Facebook data archive ZIP. """
     def __init__(self, location):
         super().__init__(location)
         self.type = TYPE_HTML
+
+    def get_message_file_list(self):
+        pass
+
+    def parse_message_file(self, message_file):
+        pass
 
 
 def _count_list_similarities(primary, proposed):
