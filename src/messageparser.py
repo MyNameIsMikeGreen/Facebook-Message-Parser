@@ -13,7 +13,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_archive(location):
+def import_archive(location):
     """
     Given the location of a Facebook archive, creates the appropriate archive object to represent it.
     :param location: Path to ZIP.
@@ -30,5 +30,5 @@ def get_archive(location):
 
 if __name__ == '__main__':
     args = parse_arguments()
-    archive = get_archive(args.archive)
+    archive = import_archive(args.archive)
     print(archive.get_message_file_list())
