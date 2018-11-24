@@ -18,5 +18,5 @@ if __name__ == '__main__':
     args = parse_arguments()
     archive = import_archive(args.archive)
     database = FacebookArchiveDatabase(archive)
-    database.create_tables(get_all_table_details())
-    database.populate()
+    database.create_tables()  # Utilise default table detail specification
+    # TODO: Implement a database.populate() function to trigger parsing
