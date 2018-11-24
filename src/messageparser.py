@@ -1,21 +1,6 @@
 import argparse
-import logging
 
-from zip.archiveinspector import ArchiveInspector
-
-
-def run_query(query_string, con):
-    """
-    Run a query on a SQLite database.
-    :param query_string: Query to run.
-    :param con: Connection to run query on.
-    :return: Result of query.
-    """
-    logging.info("Running query: '{}'".format(query_string))
-    cur = con.cursor()
-    cur.execute(query_string)
-    logging.info("Query ran successfully.")
-    return cur.fetchall()
+from zip.facebookarchive import TYPE_JSON, TYPE_HTML, FacebookJsonArchive, FacebookHtmlArchive, FacebookArchive
 
 
 def parse_arguments():
@@ -24,10 +9,26 @@ def parse_arguments():
     :return: System arguments.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("archive", help="Path to the Facebook archive to inspect.", type=ArchiveInspector.check_archive)
+    parser.add_argument("archive", help="Path to the Facebook archive ZIP.")
     return parser.parse_args()
+
+
+def import_archive(location):
+    """
+    Given the location of a Facebook archive, creates the appropriate archive object to represent it.
+    :param location: Path to ZIP.
+    :return: Some subclass of FacebookArchive.
+    """
+    archive_type = FacebookArchive.get_archive_type(location)
+    if archive_type == TYPE_JSON:
+        return FacebookJsonArchive(location)
+    elif archive_type == TYPE_HTML:
+        return FacebookHtmlArchive(location)
+    else:
+        raise TypeError("Archive of unknown type found")
 
 
 if __name__ == '__main__':
     args = parse_arguments()
-
+    archive = import_archive(args.archive)
+    print(archive.get_message_file_list())
