@@ -7,7 +7,7 @@ def get_query_create_table(table_details):
     :param table_details: JSON defining tables in the form:
      {
         "name": "Messages",
-        "cols": [
+        "columns": [
             {
                 "name": "Message_ID",
                 "type": "integer",

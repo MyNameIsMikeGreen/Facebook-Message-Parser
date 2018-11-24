@@ -144,3 +144,18 @@ def _count_list_similarities(primary, proposed):
         if item in proposed:
             matches += 1
     return matches
+
+
+def import_archive(location):
+    """
+    Given the location of a Facebook archive, creates the appropriate archive object to represent it.
+    :param location: Path to ZIP.
+    :return: Some subclass of FacebookArchive.
+    """
+    archive_type = FacebookArchive.get_archive_type(location)
+    if archive_type == TYPE_JSON:
+        return FacebookJsonArchive(location)
+    elif archive_type == TYPE_HTML:
+        return FacebookHtmlArchive(location)
+    else:
+        raise TypeError("Archive of unknown type found")
