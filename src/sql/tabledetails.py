@@ -35,7 +35,8 @@ DEFAULT_ACTOR_TABLE_DETAILS = {
         },
         {
             "name": "Actor_Name",
-            "type": "text"
+            "type": "text",
+            "unique": True
         }
     ]
 }
