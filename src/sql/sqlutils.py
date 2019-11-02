@@ -8,7 +8,7 @@ def run_query(query_string, con):
     :param con: Connection to run query on.
     :return: Result of query.
     """
-    logging.debug("Running query: '{}'".format(query_string))
+    logging.debug(f"Running query: '{query_string}'")
     cur = con.cursor()
     cur.execute(query_string)
     logging.debug("Query ran successfully.")

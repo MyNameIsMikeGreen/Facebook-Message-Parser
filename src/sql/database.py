@@ -34,7 +34,7 @@ class FacebookArchiveDatabase(object):
         """
         # Create the tables
         for table_details in table_details_list:
-            logging.info("Instantiating '{0}' table...".format(table_details["name"]))
+            logging.info(f"Instantiating '{table_details['name']}' table...")
             # Create the table
             logging.info("Creating tables...")
             table_creation_query = get_query_create_table(table_details)
@@ -64,7 +64,7 @@ class FacebookArchiveDatabase(object):
                 raise TablesNotCreatedError("Tables must be created before population")
 
         for message_file in self.archive.get_message_file_list():
-            logging.info("Populating data from '{0}'...".format(message_file))
+            logging.info(f"Populating data from '{message_file}'...")
             conversation = self.archive.parse_message_file(message_file)
 
             logging.info("Modelling Conversation...")
