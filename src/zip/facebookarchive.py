@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from abc import ABC, abstractmethod
 from zipfile import ZipFile
 
@@ -110,7 +111,7 @@ class FacebookJsonArchive(FacebookArchive):
         Get the list of all message files in the archive.
         :return: A list of all message file paths.
         """
-        return [item for item in self.name_list if os.path.basename(item) == "message.json"]
+        return [item for item in self.name_list if self._is_message_file(item)]
 
     def parse_message_file(self, message_file):
         """
@@ -120,6 +121,10 @@ class FacebookJsonArchive(FacebookArchive):
         """
         with ZipFile(self.location, 'r') as archive:
             return json.loads(archive.read(message_file))
+
+    @staticmethod
+    def _is_message_file(filename):
+        return bool(re.match("message_\d+.json", os.path.basename(filename)))
 
 
 class FacebookHtmlArchive(FacebookArchive):

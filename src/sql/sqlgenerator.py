@@ -71,8 +71,8 @@ def get_query_insert_into_table(table_details, input_map, allow_duplicates=True)
     input_values = []
     for k, v in input_map.items():
         # TODO: Escape illegal characters fully
-        input_table_cols.append(k.replace("'", ""))
-        input_values.append(v.replace("'", ""))
+        input_table_cols.append(str(k).replace("'", ""))
+        input_values.append(str(v).replace("'", ""))
 
     # Check that the input values are valid in the table schema
     schema_table_cols = [col["name"] for col in table_details["columns"]]
