@@ -1,3 +1,4 @@
+import json
 import os
 from abc import ABC, abstractmethod
 from zipfile import ZipFile
@@ -47,7 +48,7 @@ class FacebookArchive(ABC):
         """
         Parse a message file within the archive.
         :param message_file: Path to message file to parse.
-        :return: TODO
+        :return: Message file as dictionary.
         """
         pass
 
@@ -112,7 +113,13 @@ class FacebookJsonArchive(FacebookArchive):
         return [item for item in self.name_list if os.path.basename(item) == "message.json"]
 
     def parse_message_file(self, message_file):
-        pass
+        """
+        Read in the JSON source as a Python dictionary.
+        :param message_file: Path to message file to parse.
+        :return: Message file as dictionary.
+        """
+        with ZipFile(self.location, 'r') as archive:
+            return json.loads(archive.read(message_file))
 
 
 class FacebookHtmlArchive(FacebookArchive):
@@ -129,6 +136,11 @@ class FacebookHtmlArchive(FacebookArchive):
         return [item for item in self.name_list if os.path.basename(item) == "message.html"]
 
     def parse_message_file(self, message_file):
+        """
+        Read in the HTML source and convert it to a Python dictionary.
+        :param message_file: Path to message file to parse.
+        :return: Message file as dictionary.
+        """
         pass
 
 
@@ -144,3 +156,18 @@ def _count_list_similarities(primary, proposed):
         if item in proposed:
             matches += 1
     return matches
+
+
+def import_archive(location):
+    """
+    Given the location of a Facebook archive, creates the appropriate archive object to represent it.
+    :param location: Path to ZIP.
+    :return: Some subclass of FacebookArchive.
+    """
+    archive_type = FacebookArchive.get_archive_type(location)
+    if archive_type == TYPE_JSON:
+        return FacebookJsonArchive(location)
+    elif archive_type == TYPE_HTML:
+        return FacebookHtmlArchive(location)
+    else:
+        raise TypeError("Archive of unknown type found")
