@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 
 def run_query(query_string, con):
@@ -8,8 +9,13 @@ def run_query(query_string, con):
     :param con: Connection to run query on.
     :return: Result of query.
     """
-    logging.debug(f"Running query: '{query_string}'")
+    query_id = _generate_id()
+    logging.debug(f"Running query ({query_id}): '{query_string}'")
     cur = con.cursor()
     cur.execute(query_string)
-    logging.debug("Query ran successfully.")
+    logging.debug(f"Query ({query_id}) ran successfully.")
     return cur.fetchall()
+
+
+def _generate_id():
+    return str(uuid.uuid4())[-12:]
