@@ -3,4 +3,4 @@
 
 Convert a Facebook message archive to an SQLite database for further querying.
 
-**Notice**: As of 2018, Facebook has overhauled the format of their data archive dumps and the existing parser will not work with the amendments. At this stage, this project is for use exclusively for pre-2018 Facebook message archives.
+**Notice**: As of 2018, Facebook has overhauled the format of their data archive dumps. This project has been updated to support this new format exclusively. If you require compatibility with the pre-2018 format, you may try the [v1.0.0 release](https://github.com/mikegreen1995/Facebook-Message-Parser/releases/tag/v1.0.0) but this version is not maintained.
