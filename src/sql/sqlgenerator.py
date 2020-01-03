@@ -10,7 +10,7 @@ def get_query_unique_index(table_details):
                 unique_columns.append(column_detail["name"])
     if unique_columns:
         unique_columns_clause = ", ".join(unique_columns)
-        query = "CREATE UNIQUE INDEX {0}_index on {0} ({1})".format(table_details["name"], unique_columns_clause)
+        query = f"CREATE UNIQUE INDEX {table_details['name']}_index on {table_details['name']} ({unique_columns_clause})"
         return query
     else:
         return None
@@ -34,15 +34,15 @@ def get_query_create_table(table_details):
     """
     col_strings = []
     for col in table_details["columns"]:
-        col_string = "{0} {1}".format(col["name"], col["type"])
+        col_string = f"{col['name']} {col['type']}"
         if "attributes" in col:
             attributes = " ".join([attribute for attribute in col["attributes"]])
             col_string += " " + attributes
         col_strings.append(col_string)
     table_cols_string = ", ".join(col_strings)
 
-    query = "CREATE table {0}({1})".format(table_details["name"], table_cols_string)
-    logging.debug("Generated table creation SQL query: '{}'".format(query))
+    query = f"CREATE table {table_details['name']}({table_cols_string})"
+    logging.debug(f"Generated table creation SQL query: '{query}'")
     return query
 
 
@@ -71,8 +71,8 @@ def get_query_insert_into_table(table_details, input_map, allow_duplicates=True)
     input_values = []
     for k, v in input_map.items():
         # TODO: Escape illegal characters fully
-        input_table_cols.append(k.replace("'", ""))
-        input_values.append(v.replace("'", ""))
+        input_table_cols.append(str(k).replace("'", ""))
+        input_values.append(str(v).replace("'", ""))
 
     # Check that the input values are valid in the table schema
     schema_table_cols = [col["name"] for col in table_details["columns"]]
@@ -87,6 +87,6 @@ def get_query_insert_into_table(table_details, input_map, allow_duplicates=True)
         ignore_statement = " "
     else:
         ignore_statement = " or IGNORE "
-    query = "INSERT{0}into {1} ({2}) VALUES ({3})".format(ignore_statement, table_details["name"], table_cols_str, values_str)
-    logging.debug("Generated table insertion SQL query: '{}'".format(query))
+    query = f"INSERT{ignore_statement}into {table_details['name']} ({table_cols_str}) VALUES ({values_str})"
+    logging.debug(f"Generated table insertion SQL query: '{query}'")
     return query

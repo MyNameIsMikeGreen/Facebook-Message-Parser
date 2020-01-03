@@ -3,8 +3,8 @@ DEFAULT_MESSAGE_TABLE_DETAILS = {
         "columns": [
             {
                 "name": "Message_ID",
-                "type": "integer",
-                "attributes": ["primary", "key", "autoincrement"]
+                "type": "text",
+                "attributes": ["primary", "key"]
             },
             {
                 "name": "Actor_ID",
@@ -30,8 +30,8 @@ DEFAULT_ACTOR_TABLE_DETAILS = {
     "columns": [
         {
             "name": "Actor_ID",
-            "type": "integer",
-            "attributes": ["primary", "key", "autoincrement"]
+            "type": "text",
+            "attributes": ["primary", "key"]
         },
         {
             "name": "Actor_Name",
@@ -46,8 +46,8 @@ DEFAULT_CONVERSATION_TABLE_DETAILS = {
     "columns": [
         {
             "name": "Conversation_ID",
-            "type": "integer",
-            "attributes": ["primary", "key", "autoincrement"]
+            "type": "text",
+            "attributes": ["primary", "key"]
         },
         {
             "name": "Conversation_Name",
