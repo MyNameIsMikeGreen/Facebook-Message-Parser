@@ -19,9 +19,9 @@ class FacebookArchive(ABC):
         Holds the meta-data related to a Facebook data archive.
         :param location: Location of the archive.
         """
-        self.verify_archive_exists(location)
         self.location = location
-        self.name_list = self.get_file_names_from_zip(self.location)
+        self._verify_archive_exists()
+        self.name_list = self.get_file_names()
         super().__init__()
 
     @abstractmethod
@@ -41,29 +41,24 @@ class FacebookArchive(ABC):
         """
         pass
 
-    @staticmethod
-    def get_file_names_from_zip(file_path):
-        with ZipFile(file_path, "r") as zip_file:
+    def get_file_names(self):
+        with ZipFile(self.location, "r") as zip_file:
             return zip_file.namelist()
 
-    @staticmethod
-    def verify_archive_exists(file_path):
+    def _verify_archive_exists(self):
         """
         Verifies whether an archive exists in the supplied location. Raises an error if not.
-        :param file_path: Path to archive file.
         :raises FileNotFoundError if file does not exist.
         :raises InvalidArchiveError if the file is not recognised as an archive.
         """
-        if not os.path.isfile(file_path):
-            raise FileNotFoundError("No file found at: " + file_path)
-        if not FacebookArchive.file_is_archive(file_path):
+        if not os.path.isfile(self.location):
+            raise FileNotFoundError("No file found at: " + self.location)
+        if not self._file_is_archive():
             raise InvalidArchiveError("The supplied archive is invalid.")
 
-    @staticmethod
-    def file_is_archive(file_path, confidence=0.8):
+    def _file_is_archive(self, confidence=0.8):
         """
         Determines whether a file is probably a Facebook archive file based on the subdirectories the archive contains.
-        :type file_path: Path of file to check.
         :param confidence: 0 to 1 confidence value representing what percentage of common subdirectories the provided
         zip must have with the set of expected subdirectories in a typical Facebook archive.
         :return: True if the file is of similar format to a Facebook archive file. Else, False.
@@ -71,7 +66,7 @@ class FacebookArchive(ABC):
         if not 0 < confidence <= 1:
             raise ValueError("Confidence value must be: 0 < confidence <= 1")
 
-        top_level_names = FacebookArchive.get_top_level_names_from_zip(file_path)
+        top_level_names = self._get_top_level_names_from_zip()
         if MESSAGES not in top_level_names:
             return False
 
@@ -80,6 +75,36 @@ class FacebookArchive(ABC):
             return False
 
         return True  # All checks passed
+
+    def _get_top_level_names_from_zip(self):
+        """
+        Extract top level file names from the archive.
+        :return: List of top level file names inside archive.
+        """
+        return FacebookArchive._top_level_names(self.get_file_names())
+
+    @staticmethod
+    def determine_archive_type(location):
+        """
+        Determines the type of archive.
+        :return: Facebook archive type.
+        """
+        # TODO: Implement a more rigorous check of archive type.
+        with ZipFile(location, "r") as zip_file:
+            name_list = zip_file.namelist()
+        if "index.html" in name_list:
+            return ArchiveType.html
+        else:
+            return ArchiveType.json
+
+    @staticmethod
+    def _top_level_names(name_list):
+        """
+        Extract top level name from a list of file paths.
+        :param name_list: List of file paths.
+        :return: Supplied list containing only the top level names.
+        """
+        return [name.split("/")[0] for name in name_list]
 
     @staticmethod
     def confidence(expected_names, found_names):
@@ -91,40 +116,6 @@ class FacebookArchive(ABC):
         """
         expected_subdir_count = _count_list_similarities(expected_names, found_names)
         return expected_subdir_count / len(expected_names)
-
-    @staticmethod
-    def get_top_level_names_from_zip(file_path):
-        """
-        Extract top level file names inside a zip at supplied location.
-        :param file_path: Path to archive.
-        :return: List of top level file names inside archive.
-        """
-        name_list = FacebookArchive.get_file_names_from_zip(file_path)
-        return FacebookArchive.top_level_names(name_list)
-
-    @staticmethod
-    def top_level_names(name_list):
-        """
-        Extract top level name from a list of file paths.
-        :param name_list: List of file paths.
-        :return: Supplied list containing only the top level names.
-        """
-        return [name.split("/")[0] for name in name_list]
-
-    @staticmethod
-    def get_archive_type(file_path):
-        """
-        Determines the type of archive at a path.
-        :param file_path: Path to the archive to test.
-        :return: Facebook archive type.
-        """
-        # TODO: Implement a more rigorous check of archive type.
-        with ZipFile(file_path, "r") as zip_file:
-            name_list = zip_file.namelist()
-        if "index.html" in name_list:
-            return ArchiveType.html
-        else:
-            return ArchiveType.json
 
 
 class FacebookJsonArchive(FacebookArchive):
@@ -193,7 +184,7 @@ def import_archive(location):
     :param location: Path to ZIP.
     :return: Some subclass of FacebookArchive.
     """
-    archive_type = FacebookArchive.get_archive_type(location)
+    archive_type = FacebookArchive.determine_archive_type(location)
     if archive_type == ArchiveType.json:
         return FacebookJsonArchive(location)
     elif archive_type == ArchiveType.html:
