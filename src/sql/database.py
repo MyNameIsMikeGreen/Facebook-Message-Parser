@@ -36,6 +36,7 @@ class FacebookArchiveDatabase(object):
         """Create the tables."""
         for table_details in tqdm(TABLE_DETAILS_LIST, desc="Creating Tables", unit="tables"):
             self._create_table(table_details)
+        self.connection.commit()
         self.tables_created = True
 
     def _create_table(self, table_details):
@@ -63,6 +64,7 @@ class FacebookArchiveDatabase(object):
 
         for message_file in tqdm(self.archive.get_message_file_list(), desc="Processing Message Files", unit="files"):
             self._process_message_file(message_file)
+        self.connection.commit()
 
     def _process_message_file(self, message_file):
         logging.info(f"Populating data from '{message_file}'...")
