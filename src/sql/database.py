@@ -1,4 +1,5 @@
 import logging
+import os
 import sqlite3
 import uuid
 
@@ -23,6 +24,8 @@ class FacebookArchiveDatabase(object):
         :param archive: Some FacebookArchive to model in SQLite.
         :param database_location: Path to store database, in memory by default.
         """
+        if os.path.exists(database_location):
+            raise FileExistsError("Database file already exists.")
         self.database_location = database_location
         self.archive = archive
         self.connection = sqlite3.connect(database_location)

@@ -22,7 +22,7 @@ APIs come and go. APIs change. Servers have downtime. A solar flare could take d
 ``` python3 messageparser.py [path_to_your_archive]```
 
 ## How do I Run a Query?
-There is no fancy way of doing this currently. Just use the utility functions provided and throw a query into the end of the main function. Or, even better, submit a pull request with some nicer solution.
+There is no fancy way of doing this within the program currently. You can just use the utility functions provided and throw a query into the end of the main function, or you could output the database to a file using the `--output` flag and use some third-party tool to run queries.
 
 ## Your Program [Doesn't Work] / [Broke My Archive] / [Killed My Cat] / [Cured My Arthritis]!
 This is supplied for free and completely without guarantee. Check the code before you run it if you are concerned. I accept no responsibility for anything that happens as a result of running this program.

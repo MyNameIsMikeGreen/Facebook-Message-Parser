@@ -100,3 +100,4 @@ user_aliases.txt
 data/
 src/zip/tests/test_zip.py
 *.zip
+*.sqlite
