@@ -6,7 +6,7 @@ from sql.query import Query
 from zip.facebookarchive import import_archive
 
 
-def parse_arguments():
+def _parse_arguments():
     """
     Performs system argument setup.
     :return: System arguments.
@@ -17,15 +17,18 @@ def parse_arguments():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
-    args = parse_arguments()
+def _set_logging_level():
     if args.log:
         numeric_level = getattr(logging, args.log.upper(), None)
         logging.basicConfig(level=numeric_level)
 
-    archive = import_archive(args.archive)
-    database = FacebookArchiveDatabase(archive)
-    database.create_tables()  # Utilise default table detail specification
+
+if __name__ == '__main__':
+    args = _parse_arguments()
+    _set_logging_level()
+
+    database = FacebookArchiveDatabase(import_archive(args.archive))
+    database.create_tables()
     database.populate()
 
     # ==== Sample queries for testing purposes. Remove in time. ====

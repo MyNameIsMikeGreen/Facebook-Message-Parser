@@ -12,6 +12,7 @@ def get_query_unique_index(table_details):
     if unique_columns:
         unique_columns_clause = ", ".join(unique_columns)
         query = Query(f"CREATE UNIQUE INDEX {table_details['name']}_index on {table_details['name']} ({unique_columns_clause})")
+        logging.debug(f"Generated index creation SQL query: '{str(query)}'")
         return query
     else:
         return None
