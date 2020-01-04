@@ -1,6 +1,6 @@
 import unittest
 
-from sql.sqlgenerator import get_query_create_table, get_query_insert_into_table
+from sql.query import get_query_create_table, get_query_insert_into_table
 
 
 class TestSql(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestSql(unittest.TestCase):
                         "Message_Sender text, " \
                         "Message_Receiver text)"
 
-        actual_query = get_query_create_table(messages_table_details)
+        actual_query = str(get_query_create_table(messages_table_details))
 
         self.assertEqual(actual_query, correct_query)
 
@@ -83,7 +83,7 @@ class TestSql(unittest.TestCase):
             "Message_Receiver": "Mike again"
         }
 
-        actual_query = get_query_insert_into_table(messages_table_details, insertion_values)
+        actual_query = str(get_query_insert_into_table(messages_table_details, insertion_values))
         correct_query = "INSERT into Messages (Message_Text, Message_DateTime, Message_Sender, Message_Receiver) " \
                         "VALUES ('This is a message.', '2018-08-10 15:15:15', 'Mike', 'Mike again')"
 

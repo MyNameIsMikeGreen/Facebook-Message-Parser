@@ -2,11 +2,13 @@ import logging
 import sqlite3
 import uuid
 
+from tqdm import tqdm
+
 from sql.errors import TablesNotCreatedError
-from sql.sqlgenerator import get_query_create_table, get_query_insert_into_table, get_query_unique_index
-from sql.sqlutils import run_query
-from sql.tabledetails import DEFAULT_TABLE_DETAILS_LIST, DEFAULT_ACTOR_TABLE_DETAILS, \
-    DEFAULT_CONVERSATION_TABLE_DETAILS, DEFAULT_MESSAGE_TABLE_DETAILS
+from sql.query import get_query_create_table, get_query_insert_into_table, get_query_unique_index, \
+    get_query_lookup_actor_id
+from sql.tabledetails import TABLE_DETAILS_LIST, ACTOR_TABLE_DETAILS, \
+    CONVERSATION_TABLE_DETAILS, MESSAGE_TABLE_DETAILS
 from zip.facebookarchive import FacebookArchive
 
 
@@ -24,89 +26,80 @@ class FacebookArchiveDatabase(object):
         self.database_location = database_location
         self.archive = archive
         self.connection = sqlite3.connect(database_location)
-        self.table_details = None  # No details until created
+        self.table_details = None
         self.tables_created = False
 
-    def create_tables(self, table_details_list=DEFAULT_TABLE_DETAILS_LIST):
-        """
-        Given a table details JSON structure, create the tables defined.
-        :param table_details_list: List of table details JSON objects.
-        """
-        # Create the tables
-        for table_details in table_details_list:
-            logging.info(f"Instantiating '{table_details['name']}' table...")
-            # Create the table
-            logging.info("Creating tables...")
-            table_creation_query = get_query_create_table(table_details)
-            run_query(table_creation_query, self.connection)
-
-            # Set any necessary unique indexes
-            logging.info("Enforcing unique columns...")
-            unique_index_query = get_query_unique_index(table_details)
-            if unique_index_query:
-                run_query(unique_index_query, self.connection)
-
+    def create_tables(self):
+        """Create the tables."""
+        for table_details in tqdm(TABLE_DETAILS_LIST, desc="Creating Tables", unit="tables"):
+            self._create_table(table_details)
         self.tables_created = True
+
+    def _create_table(self, table_details):
+        """
+        Create the supplied table.
+        :param table_details: Table details for the table to create.
+        """
+        logging.info(f"Creating '{table_details['name']}' table...")
+        get_query_create_table(table_details).run(self.connection)
+        logging.info("Enforcing unique columns...")
+        unique_index_query = get_query_unique_index(table_details)
+        if unique_index_query:
+            unique_index_query.run(self.connection)
 
     def populate(self, create_tables=False):
         """
-        Populate the database using the supplied archive. Assumes default table details.
-        :param create_tables: Create tables using the default table details list automatically before population.
+        Populate the database using the supplied archive.
+        :param create_tables: Create tables automatically before population.
         """
-
-        # TODO: Look into supporting non-default table details
-
-        # Ensure database is ready for data
         if not self.tables_created:
             if create_tables:
                 self.create_tables()
             else:
                 raise TablesNotCreatedError("Tables must be created before population")
 
-        for message_file in self.archive.get_message_file_list():
-            logging.info(f"Populating data from '{message_file}'...")
-            conversation = self.archive.parse_message_file(message_file)
+        for message_file in tqdm(self.archive.get_message_file_list(), desc="Processing Message Files", unit="files"):
+            self._process_message_file(message_file)
 
-            logging.info("Modelling Conversation...")
-            conversation_id = self._add_conversation(conversation)
-
-            logging.info("Extracting actors...")
-            for participant in conversation["participants"]:
-                _ = self._add_actor(participant)
-
-            logging.info("Extracting messages...")
-            for message in conversation["messages"]:
-                self._add_message(message, conversation_id)
+    def _process_message_file(self, message_file):
+        logging.info(f"Populating data from '{message_file}'...")
+        conversation = self.archive.parse_message_file(message_file)
+        logging.info("Modelling Conversation...")
+        conversation_id = self._add_conversation(conversation)
+        logging.info("Extracting actors...")
+        for participant in conversation["participants"]:
+            _ = self._add_actor(participant)
+        logging.info("Extracting messages...")
+        for message in conversation["messages"]:
+            self._add_message(message, conversation_id)
 
     def _add_conversation(self, conversation):
         """Add a conversation to the database, return the ID of the created conversation."""
-        conversation_name = self._sanitise_string(conversation["title"])
         query = "UNINITIALISED"
         conversation_id = self._generate_id()
         try:
-            query = get_query_insert_into_table(DEFAULT_CONVERSATION_TABLE_DETAILS,
+            query = get_query_insert_into_table(CONVERSATION_TABLE_DETAILS,
                                                 {
                                                     "Conversation_ID": conversation_id,
-                                                    "Conversation_Name": conversation_name
+                                                    "Conversation_Name": conversation
                                                 },
                                                 allow_duplicates=True)
-            run_query(query, self.connection)
+            query.run(self.connection)
             return conversation_id
         except sqlite3.OperationalError:
             print("Failed to run query: " + query)
 
     def _add_actor(self, participant):
-        participant_name = self._sanitise_string(participant["name"])
         query = "UNINITIALISED"
         actor_id = self._generate_id()
         try:
-            query = get_query_insert_into_table(DEFAULT_ACTOR_TABLE_DETAILS,
+            query = get_query_insert_into_table(ACTOR_TABLE_DETAILS,
                                                 {
                                                     "Actor_ID": actor_id,
-                                                    "Actor_Name": participant_name
+                                                    "Actor_Name": participant["name"]
                                                 },
                                                 allow_duplicates=False)
-            run_query(query, self.connection)
+            query.run(self.connection)
             return actor_id
         except sqlite3.OperationalError:
             print("Failed to run query: " + query)
@@ -116,43 +109,33 @@ class FacebookArchiveDatabase(object):
             logging.info("Skipping message without content")
             return
 
-        sender_name = message["sender_name"]
-        sender_id = self.lookup_sender_id(sender_name)
-        content = message["content"]
-        timestamp_ms = message["timestamp_ms"]
         query = "UNINITIALISED"
         message_id = self._generate_id()
         try:
-            query = get_query_insert_into_table(DEFAULT_MESSAGE_TABLE_DETAILS,
+            query = get_query_insert_into_table(MESSAGE_TABLE_DETAILS,
                                                 {
                                                     "Message_ID": message_id,
-                                                    "Actor_ID": sender_id,
+                                                    "Actor_ID": self._lookup_sender_id(message["sender_name"]),
                                                     "Conversation_ID": conversation_id,
-                                                    "Timestamp": timestamp_ms,
-                                                    "Content": self._sanitise_string(content),
+                                                    "Timestamp": message["timestamp_ms"],
+                                                    "Content": message["content"],
                                                 },
                                                 allow_duplicates=True)
-            run_query(query, self.connection)
+            query.run(self.connection)
             return message_id
         except sqlite3.OperationalError:
             print("Failed to run query: " + query)
 
-    def lookup_sender_id(self, sender_name):
-        # TODO: Add to sqlgenerator.py
+    def _lookup_sender_id(self, sender_name):
         query = "UNINITIALISED"
         try:
-            query = f"SELECT Actor_ID FROM Actors WHERE Actor_Name='{self._sanitise_string(sender_name)}'"
-            query_result = run_query(query, self.connection)
+            query = get_query_lookup_actor_id(sender_name)
+            query_result = query.run(self.connection)
             if len(query_result) == 0:
                 return "UNKNOWN_ACTOR"
             return query_result[0][0]
         except sqlite3.OperationalError:
             print("Failed to run query: " + query)
-
-    @staticmethod
-    def _sanitise_string(string):
-        # TODO: Stronger sanitisation - escape rather than replace.
-        return string.replace("'", "")
 
     @staticmethod
     def _generate_id():
