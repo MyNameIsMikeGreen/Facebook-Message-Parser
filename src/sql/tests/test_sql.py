@@ -1,6 +1,6 @@
 import unittest
 
-from sql.sqlgenerator import get_query_create_table, get_query_insert_into_table
+from sql.query import get_query_create_table, get_query_insert_into_table
 
 
 class TestSql(unittest.TestCase):

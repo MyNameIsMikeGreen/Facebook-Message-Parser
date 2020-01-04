@@ -2,7 +2,7 @@ import argparse
 import logging
 
 from sql.database import FacebookArchiveDatabase
-from sql.sqlutils import run_query
+from sql.query import Query
 from zip.facebookarchive import import_archive
 
 
@@ -30,11 +30,11 @@ if __name__ == '__main__':
 
     # ==== Sample queries for testing purposes. Remove in time. ====
     print("Table names:")
-    table_names_results = run_query("SELECT name FROM sqlite_master WHERE type='table'", database.connection)
+    table_names_results = Query("SELECT name FROM sqlite_master WHERE type='table'").run(database.connection)
     for table_name_result in table_names_results:
         print(table_name_result[0])
 
     print("Actor names:")
-    name_results = run_query("SELECT Actor_Name FROM Actors", database.connection)
+    name_results = Query("SELECT Actor_Name FROM Actors").run(database.connection)
     for name_result in name_results:
         print(name_result[0])
