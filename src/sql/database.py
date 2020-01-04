@@ -2,6 +2,8 @@ import logging
 import sqlite3
 import uuid
 
+from tqdm import tqdm
+
 from sql.errors import TablesNotCreatedError
 from sql.query import get_query_create_table, get_query_insert_into_table, get_query_unique_index, \
     get_query_lookup_actor_id
@@ -34,7 +36,7 @@ class FacebookArchiveDatabase(object):
         """
         # TODO: Reassess the need/implementation of customisable table details
         # Create the tables
-        for table_details in table_details_list:
+        for table_details in tqdm(table_details_list, desc="Creating Tables", unit="tables"):
             logging.info(f"Instantiating '{table_details['name']}' table...")
             # Create the table
             logging.info("Creating tables...")
@@ -64,7 +66,7 @@ class FacebookArchiveDatabase(object):
             else:
                 raise TablesNotCreatedError("Tables must be created before population")
 
-        for message_file in self.archive.get_message_file_list():
+        for message_file in tqdm(self.archive.get_message_file_list(), desc="Processing Message Files", unit="files"):
             logging.info(f"Populating data from '{message_file}'...")
             conversation = self.archive.parse_message_file(message_file)
 
