@@ -49,8 +49,8 @@ class FacebookArchiveDatabase(object):
 
     def populate(self, create_tables=False):
         """
-        Populate the database using the supplied archive. Assumes default table details.
-        :param create_tables: Create tables using the default table details list automatically before population.
+        Populate the database using the supplied archive.
+        :param create_tables: Create tables automatically before population.
         """
         if not self.tables_created:
             if create_tables:
