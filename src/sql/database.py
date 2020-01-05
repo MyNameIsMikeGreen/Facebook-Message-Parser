@@ -86,7 +86,7 @@ class FacebookArchiveDatabase(object):
             query = get_query_insert_into_table(CONVERSATION_TABLE_DETAILS,
                                                 {
                                                     "Conversation_ID": conversation_id,
-                                                    "Conversation_Name": conversation
+                                                    "Conversation_Title": conversation["title"]
                                                 },
                                                 allow_duplicates=True)
             query.run(self.connection)

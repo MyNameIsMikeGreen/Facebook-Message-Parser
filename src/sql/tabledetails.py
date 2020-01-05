@@ -50,7 +50,7 @@ CONVERSATION_TABLE_DETAILS = {
             "attributes": ["primary", "key"]
         },
         {
-            "name": "Conversation_Name",
+            "name": "Conversation_Title",
             "type": "text"
         }
     ]
